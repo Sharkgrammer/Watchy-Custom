@@ -23,6 +23,8 @@ RTC_DATA_ATTR bool USB_PLUGGED_IN = false;
 RTC_DATA_ATTR tmElements_t bootTime;
 RTC_DATA_ATTR uint32_t lastIPAddress;
 RTC_DATA_ATTR char lastSSID[30];
+RTC_DATA_ATTR float hourAdj = 4.08;
+RTC_DATA_ATTR bool allowHourAdj = true;
 
 void Watchy::init(String datetime) {
   esp_sleep_wakeup_cause_t wakeup_reason;
@@ -93,6 +95,10 @@ void Watchy::init(String datetime) {
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     break;
   }
+
+  // Account for Drift after everything else is done
+  accountForDrift();
+
   deepSleep();
 }
 void Watchy::deepSleep() {
@@ -298,7 +304,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
       "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP"};
+      "Sync NTP", "Check Drift"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
     display.setCursor(0, yPos);
@@ -331,7 +337,7 @@ void Watchy::showFastMenu(byte menuIndex) {
   const char *menuItems[] = {
       "About Watchy", "Vibrate Motor", "Show Accelerometer",
       "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP"};
+      "Sync NTP", "Check Drift"};
   for (int i = 0; i < MENU_LENGTH; i++) {
     yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
     display.setCursor(0, yPos);
@@ -368,6 +374,10 @@ void Watchy::showAbout() {
   float voltage = getBatteryVoltage();
   display.print(voltage);
   display.println("V");
+
+ display.print("Drift: ");
+ display.print(hourAdj);
+ display.println(" sec per hour");
 
   #ifndef ARDUINO_ESP32S3_DEV
   display.print("Uptime: ");
@@ -1149,4 +1159,29 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
   breakTime((time_t)timeClient.getEpochTime(), tm);
   RTC.set(tm);
   return true;
+}
+
+// Time adjustment code to adjust for time drift
+void Watchy::accountForDrift() {
+    if (currentTime.Minute == 1) {
+        if (allowHourAdj) {
+
+            if (currentTime.Second >= hourAdj) {
+                currentTime.Second -= hourAdj;
+            } else if (currentTime.Second < hourAdj && currentTime.Second != 0) {
+                currentTime.Minute = 0;
+                currentTime.Second = 60 - (hourAdj - currentTime.Second);
+            } else {
+                currentTime.Minute = 0;
+                currentTime.Second = 60 - hourAdj;
+            }
+
+            RTC.set(currentTime);
+            allowHourAdj = false;
+        }
+    }
+
+    if (currentTime.Minute == 10) {
+        allowHourAdj = true;
+    }
 }

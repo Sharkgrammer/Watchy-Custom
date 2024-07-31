@@ -98,6 +98,8 @@ public:
   weatherData getWeatherData();
   void updateFWBegin();
 
+  void accountForDrift();
+
   void showWatchFace(bool partialRefresh);
   virtual void drawWatchFace(); // override this method for different watch
                                 // faces
@@ -119,5 +121,7 @@ extern RTC_DATA_ATTR BMA423 sensor;
 extern RTC_DATA_ATTR bool WIFI_CONFIGURED;
 extern RTC_DATA_ATTR bool BLE_CONFIGURED;
 extern RTC_DATA_ATTR bool USB_PLUGGED_IN;
+extern RTC_DATA_ATTR float hourAdj;
+extern RTC_DATA_ATTR bool allowHourAdj;
 
 #endif
