@@ -301,7 +301,7 @@ void Watchy::handleButtonPress() {
 
 void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
 
     int16_t x1, y1;
@@ -317,11 +317,11 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
         display.setCursor(0, yPos);
         if (i == menuIndex) {
             display.getTextBounds(menuItems[i], 0, yPos, &x1, &y1, &w, &h);
-            display.fillRect(x1 - 1, y1 - 10, 200, h + 15, GxEPD_BLACK);
-            display.setTextColor(GxEPD_WHITE);
+            display.fillRect(x1 - 1, y1 - 10, 200, h + 15, settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
+            display.setTextColor(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
             display.println(menuItems[i]);
         } else {
-            display.setTextColor(GxEPD_BLACK);
+            display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
             display.println(menuItems[i]);
         }
     }
@@ -334,7 +334,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
 
 void Watchy::showFastMenu(byte menuIndex) {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
 
     int16_t x1, y1;
@@ -350,11 +350,11 @@ void Watchy::showFastMenu(byte menuIndex) {
         display.setCursor(0, yPos);
         if (i == menuIndex) {
             display.getTextBounds(menuItems[i], 0, yPos, &x1, &y1, &w, &h);
-            display.fillRect(x1 - 1, y1 - 10, 200, h + 15, GxEPD_BLACK);
-            display.setTextColor(GxEPD_WHITE);
+            display.fillRect(x1 - 1, y1 - 10, 200, h + 15, settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
+            display.setTextColor(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
             display.println(menuItems[i]);
         } else {
-            display.setTextColor(GxEPD_BLACK);
+            display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
             display.println(menuItems[i]);
         }
     }
@@ -366,9 +366,9 @@ void Watchy::showFastMenu(byte menuIndex) {
 
 void Watchy::showAbout() {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(0, 20);
 
     display.print("LibVer: ");
@@ -419,9 +419,9 @@ void Watchy::showAbout() {
 
 void Watchy::showBuzz() {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(70, 80);
     display.println("Buzz!");
     display.display(false); // full refresh
@@ -532,56 +532,56 @@ void Watchy::setTime() {
             }
         }
 
-        display.fillScreen(GxEPD_WHITE);
-        display.setTextColor(GxEPD_BLACK);
+        display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
+        display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
         display.setFont(&DSEG7_Classic_Bold_53);
 
         display.setCursor(5, 80);
         if (setIndex == SET_HOUR) { // blink hour digits
-            display.setTextColor(blink ? GxEPD_BLACK : GxEPD_WHITE);
+            display.setTextColor(blink ? (settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK) : (settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE));
         }
         if (hour < 10) {
             display.print("0");
         }
         display.print(hour);
 
-        display.setTextColor(GxEPD_BLACK);
+        display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
         display.print(":");
 
         display.setCursor(108, 80);
         if (setIndex == SET_MINUTE) { // blink minute digits
-            display.setTextColor(blink ? GxEPD_BLACK : GxEPD_WHITE);
+            display.setTextColor(blink ? (settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK) : (settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE));
         }
         if (minute < 10) {
             display.print("0");
         }
         display.print(minute);
 
-        display.setTextColor(GxEPD_BLACK);
+        display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
 
         display.setFont(&FreeMonoBold9pt7b);
         display.setCursor(45, 150);
         if (setIndex == SET_YEAR) { // blink minute digits
-            display.setTextColor(blink ? GxEPD_BLACK : GxEPD_WHITE);
+            display.setTextColor(blink ? (settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK) : (settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE));
         }
         display.print(2000 + year);
 
-        display.setTextColor(GxEPD_BLACK);
+        display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
         display.print("/");
 
         if (setIndex == SET_MONTH) { // blink minute digits
-            display.setTextColor(blink ? GxEPD_BLACK : GxEPD_WHITE);
+            display.setTextColor(blink ? (settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK) : (settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE));
         }
         if (month < 10) {
             display.print("0");
         }
         display.print(month);
 
-        display.setTextColor(GxEPD_BLACK);
+        display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
         display.print("/");
 
         if (setIndex == SET_DAY) { // blink minute digits
-            display.setTextColor(blink ? GxEPD_BLACK : GxEPD_WHITE);
+            display.setTextColor(blink ? (settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK) : (settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE));
         }
         if (day < 10) {
             display.print("0");
@@ -609,9 +609,9 @@ void Watchy::setTime() {
 
 void Watchy::showAccelerometer() {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
 
     Accel acc;
 
@@ -635,7 +635,7 @@ void Watchy::showAccelerometer() {
             // Get acceleration data
             bool res          = sensor.getAccel(acc);
             uint8_t direction = sensor.getDirection();
-            display.fillScreen(GxEPD_WHITE);
+            display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
             display.setCursor(0, 30);
             if (res == false) {
                 display.println("getAccel FAIL");
@@ -932,9 +932,9 @@ void Watchy::setupWifi() {
     wifiManager.setTimeout(WIFI_AP_TIMEOUT);
     wifiManager.setAPCallback(_configModeCallback);
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     if (!wifiManager.autoConnect(WIFI_AP_SSID)) { // WiFi setup failed
         display.println("Setup failed &");
         display.println("timed out!");
@@ -958,9 +958,9 @@ void Watchy::setupWifi() {
 
 void Watchy::_configModeCallback(WiFiManager *myWiFiManager) {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(0, 30);
     display.println("Connect to");
     display.print("SSID: ");
@@ -995,9 +995,9 @@ bool Watchy::connectWiFi() {
 
 void Watchy::showUpdateFW() {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(0, 30);
     display.println("Please visit");
     display.println("watchy.sqfmi.com");
@@ -1015,9 +1015,9 @@ void Watchy::showUpdateFW() {
 
 void Watchy::updateFWBegin() {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(0, 30);
     display.println("Bluetooth Started");
     display.println(" ");
@@ -1037,9 +1037,9 @@ void Watchy::updateFWBegin() {
         if (prevStatus != currentStatus || prevStatus == 1) {
             if (currentStatus == 0) {
                 display.setFullWindow();
-                display.fillScreen(GxEPD_WHITE);
+                display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
                 display.setFont(&FreeMonoBold9pt7b);
-                display.setTextColor(GxEPD_BLACK);
+                display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
                 display.setCursor(0, 30);
                 display.println("BLE Connected!");
                 display.println(" ");
@@ -1049,9 +1049,9 @@ void Watchy::updateFWBegin() {
             }
             if (currentStatus == 1) {
                 display.setFullWindow();
-                display.fillScreen(GxEPD_WHITE);
+                display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
                 display.setFont(&FreeMonoBold9pt7b);
-                display.setTextColor(GxEPD_BLACK);
+                display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
                 display.setCursor(0, 30);
                 display.println("Downloading");
                 display.println("firmware:");
@@ -1062,9 +1062,9 @@ void Watchy::updateFWBegin() {
             }
             if (currentStatus == 2) {
                 display.setFullWindow();
-                display.fillScreen(GxEPD_WHITE);
+                display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
                 display.setFont(&FreeMonoBold9pt7b);
-                display.setTextColor(GxEPD_BLACK);
+                display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
                 display.setCursor(0, 30);
                 display.println("Download");
                 display.println("completed!");
@@ -1077,9 +1077,9 @@ void Watchy::updateFWBegin() {
             }
             if (currentStatus == 4) {
                 display.setFullWindow();
-                display.fillScreen(GxEPD_WHITE);
+                display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
                 display.setFont(&FreeMonoBold9pt7b);
-                display.setTextColor(GxEPD_BLACK);
+                display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
                 display.setCursor(0, 30);
                 display.println("BLE Disconnected!");
                 display.println(" ");
@@ -1101,9 +1101,9 @@ void Watchy::updateFWBegin() {
 
 void Watchy::showSyncNTP() {
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(0, 30);
     display.println("Syncing NTP... ");
     display.print("GMT offset: ");
@@ -1201,9 +1201,9 @@ void Watchy::getTimeDrift() {
     guiState = APP_STATE;
 
     display.setFullWindow();
-    display.fillScreen(GxEPD_WHITE);
+    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(GxEPD_BLACK);
+    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
     display.setCursor(0, 30);
     display.println("Checking Drift... ");
     display.display(false);
@@ -1272,28 +1272,30 @@ void Watchy::getTimeDrift() {
 }
 
 void Watchy::printTime(tmElements_t tm) {
-if (tm.Hour < 10) {
-display.print("0");
-}
-display.print(tm.Hour);
-display.print(":");
-if (tm.Minute < 10) {
-display.print("0");
-}
-display.print(tm.Minute);
 
-display.print(":");
-if (tm.Second < 10) {
-display.print("0");
-}
-display.println(tm.Second);
+    if (tm.Hour < 10) {
+        display.print("0");
+    }
+    display.print(tm.Hour);
+    display.print(":");
+
+    if (tm.Minute < 10) {
+        display.print("0");
+    }
+    display.print(tm.Minute);
+    display.print(":");
+
+    if (tm.Second < 10) {
+        display.print("0");
+    }
+    display.println(tm.Second);
 }
 
 long Watchy::getSecondsBetween(tmElements_t tm1, tmElements_t tm2){
-long secs1 = (tm1.Hour * 3600) + (tm1.Minute * 60) + tm1.Second;
-long secs2 = (tm2.Hour * 3600) + (tm2.Minute * 60) + tm2.Second;
+    long secs1 = (tm1.Hour * 3600) + (tm1.Minute * 60) + tm1.Second;
+    long secs2 = (tm2.Hour * 3600) + (tm2.Minute * 60) + tm2.Second;
 
-long allSecs = secs1 - secs2;
+    long allSecs = secs1 - secs2;
 
-return allSecs > 0 ? allSecs : allSecs * -1;
+    return allSecs > 0 ? allSecs : allSecs * -1;
 }

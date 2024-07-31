@@ -60,6 +60,7 @@ typedef struct watchySettings {
     int gmtOffset;
     //
     bool vibrateOClock;
+    bool darkMode;
 } watchySettings;
 
 class Watchy {
