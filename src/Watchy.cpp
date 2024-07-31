@@ -377,7 +377,7 @@ void Watchy::showAbout() {
 
     display.print("Drift: ");
     display.print(hourAdj);
-    display.println(" sec per hour");
+    display.println("s/h");
 
 #ifndef ARDUINO_ESP32S3_DEV
     display.print("Uptime: ");
