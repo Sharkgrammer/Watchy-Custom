@@ -62,20 +62,20 @@
 #define RTC_INT_PIN 27
 
 #if defined (ARDUINO_WATCHY_V10)
-    #define UP_BTN_PIN 32
+#define UP_BTN_PIN 32
     #define BATT_ADC_PIN 33
     #define UP_BTN_MASK  (BIT64(32))
     #define RTC_TYPE 1 //DS3231
 #elif defined (ARDUINO_WATCHY_V15)
-    #define UP_BTN_PIN 32
+#define UP_BTN_PIN 32
     #define BATT_ADC_PIN 35
     #define UP_BTN_MASK  (BIT64(32))
     #define RTC_TYPE 2 //PCF8563
 #elif defined (ARDUINO_WATCHY_V20)
-    #define UP_BTN_PIN 35
-    #define BATT_ADC_PIN 34
-    #define UP_BTN_MASK  (BIT64(35))
-    #define RTC_TYPE 2 //PCF8563
+#define UP_BTN_PIN 35
+#define BATT_ADC_PIN 34
+#define UP_BTN_MASK  (BIT64(35))
+#define RTC_TYPE 2 //PCF8563
 #endif
 
 #define MENU_BTN_MASK (BIT64(26))

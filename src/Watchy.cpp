@@ -23,8 +23,9 @@ RTC_DATA_ATTR bool USB_PLUGGED_IN = false;
 RTC_DATA_ATTR tmElements_t bootTime;
 RTC_DATA_ATTR uint32_t lastIPAddress;
 RTC_DATA_ATTR char lastSSID[30];
-RTC_DATA_ATTR float hourAdj = 4.08;
+RTC_DATA_ATTR float hourAdj = 0;
 RTC_DATA_ATTR bool allowHourAdj = true;
+RTC_DATA_ATTR tmElements_t driftCheckTime;
 
 void Watchy::init(String datetime) {
     esp_sleep_wakeup_cause_t wakeup_reason;
@@ -169,6 +170,9 @@ void Watchy::handleButtonPress() {
                 case 6:
                     showSyncNTP();
                     break;
+                case 7:
+                    getTimeDrift();
+                    break;
                 default:
                     break;
             }
@@ -250,6 +254,9 @@ void Watchy::handleButtonPress() {
                             break;
                         case 6:
                             showSyncNTP();
+                            break;
+                        case 7:
+                            getTimeDrift();
                             break;
                         default:
                             break;
@@ -1158,6 +1165,10 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
     tmElements_t tm;
     breakTime((time_t)timeClient.getEpochTime(), tm);
     RTC.set(tm);
+
+    // Set NTP as last time for drift to compare against
+    driftCheckTime = tm;
+
     return true;
 }
 
@@ -1184,4 +1195,105 @@ void Watchy::accountForDrift() {
     if (currentTime.Minute == 10) {
         allowHourAdj = true;
     }
+}
+
+void Watchy::getTimeDrift() {
+    guiState = APP_STATE;
+
+    display.setFullWindow();
+    display.fillScreen(GxEPD_WHITE);
+    display.setFont(&FreeMonoBold9pt7b);
+    display.setTextColor(GxEPD_BLACK);
+    display.setCursor(0, 30);
+    display.println("Checking Drift... ");
+    display.display(false);
+
+    if (connectWiFi()) {
+        WiFiUDP ntpUDP;
+        NTPClient timeClient(ntpUDP, settings.ntpServer.c_str(), gmtOffset);
+
+        timeClient.begin();
+        if (timeClient.forceUpdate()){
+            tmElements_t tm;
+            breakTime((time_t) timeClient.getEpochTime(), tm);
+
+            display.print("Watch: ");
+            RTC.read(currentTime);
+            printTime(currentTime);
+
+            display.print("NTP: ");
+            RTC.set(tm);
+            printTime(tm);
+
+            // Check if the drift check val has been initiated
+            if (driftCheckTime.Second == 0 && driftCheckTime.Minute == 0 && driftCheckTime.Hour == 0){
+                driftCheckTime = tm;
+
+                display.println("");
+                display.println("Check val set");
+                display.println("Check again in");
+                display.println("a 2+ hours");
+            } else {
+                long drift = getSecondsBetween(currentTime, tm);
+                float hours = (getSecondsBetween(tm, driftCheckTime) / 3600.0);
+
+                display.print("Secs: ");
+                display.println(drift);
+                display.print("Hours: ");
+                display.println(hours);
+
+                if (hours < 2.0){
+                    display.println("");
+
+                    display.println("Please wait more");
+                    display.println("at least 2 hours");
+                } else {
+                    hourAdj = drift / hours;
+
+                    display.print("Drift: ");
+                    display.print(hourAdj);
+                    display.println("s/h");
+
+                    display.println("");
+                    display.println("Calc complete");
+                }
+
+            }
+
+        } else {
+            display.println("NTP Sync Failed");
+        }
+
+    } else {
+        display.println("WiFi Not Configured");
+    }
+
+    display.display(true);
+}
+
+void Watchy::printTime(tmElements_t tm) {
+if (tm.Hour < 10) {
+display.print("0");
+}
+display.print(tm.Hour);
+display.print(":");
+if (tm.Minute < 10) {
+display.print("0");
+}
+display.print(tm.Minute);
+
+display.print(":");
+if (tm.Second < 10) {
+display.print("0");
+}
+display.println(tm.Second);
+}
+
+long Watchy::getSecondsBetween(tmElements_t tm1, tmElements_t tm2){
+long secs1 = (tm1.Hour * 3600) + (tm1.Minute * 60) + tm1.Second;
+long secs2 = (tm2.Hour * 3600) + (tm2.Minute * 60) + tm2.Second;
+
+long allSecs = secs1 - secs2;
+
+return allSecs > 0 ? allSecs : allSecs * -1;
 }
