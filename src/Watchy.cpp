@@ -958,9 +958,11 @@ void Watchy::setupWifi() {
 
 void Watchy::_configModeCallback(WiFiManager *myWiFiManager) {
     display.setFullWindow();
-    display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
+    // Static throws issues here for settings
+    // Just going to ignore it for now
+    display.fillScreen(GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
-    display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
+    display.setTextColor(GxEPD_BLACK);
     display.setCursor(0, 30);
     display.println("Connect to");
     display.print("SSID: ");
@@ -1204,7 +1206,7 @@ void Watchy::getTimeDrift() {
     display.fillScreen(settings.darkMode ? GxEPD_BLACK : GxEPD_WHITE);
     display.setFont(&FreeMonoBold9pt7b);
     display.setTextColor(settings.darkMode ? GxEPD_WHITE : GxEPD_BLACK);
-    display.setCursor(0, 30);
+    display.setCursor(0, 20);
     display.println("Checking Drift... ");
     display.display(false);
 
@@ -1222,8 +1224,16 @@ void Watchy::getTimeDrift() {
             printTime(currentTime);
 
             display.print("NTP: ");
-            RTC.set(tm);
             printTime(tm);
+
+            display.println("Last Time:");
+            display.print(currentTime.Year - 30);
+            display.print("/");
+            display.print(currentTime.Month);
+            display.print("/");
+            display.print(currentTime.Day);
+            display.print(" - ");
+            printTime(driftCheckTime);
 
             // Check if the drift check val has been initiated
             if (driftCheckTime.Second == 0 && driftCheckTime.Minute == 0 && driftCheckTime.Hour == 0){
@@ -1232,32 +1242,45 @@ void Watchy::getTimeDrift() {
                 display.println("");
                 display.println("Check val set");
                 display.println("Check again in");
-                display.println("a 2+ hours");
+                display.println("a 10+ hours");
             } else {
+                // Chance drift will be -1 due to bug
                 long drift = getSecondsBetween(currentTime, tm);
-                float hours = (getSecondsBetween(tm, driftCheckTime) / 3600.0);
 
-                display.print("Secs: ");
-                display.println(drift);
-                display.print("Hours: ");
-                display.println(hours);
-
-                if (hours < 2.0){
+                if (drift == -1){
                     display.println("");
 
                     display.println("Please wait more");
-                    display.println("at least 2 hours");
+                    display.println("at least 10 hours");
                 } else {
-                    hourAdj = drift / hours;
 
-                    display.print("Drift: ");
-                    display.print(hourAdj);
-                    display.println("s/h");
+                    // Hours shouldn't have this issue
+                    float hours = (getSecondsBetween(tm, driftCheckTime) / 3600.0);
 
-                    display.println("");
-                    display.println("Calc complete");
+                    display.print("Secs: ");
+                    display.println(drift);
+                    display.print("Hours: ");
+                    display.println(hours);
+
+                    if (hours < 10.0){
+                        display.println("");
+
+                        display.println("Please wait more");
+                        display.println("at least 10 hours");
+                    } else {
+                        hourAdj = drift / hours;
+
+                        display.print("Drift: ");
+                        display.print(hourAdj);
+                        display.println("s/h");
+
+                        display.println("");
+                        display.println("Calc complete");
+                        display.println("NTP time set");
+
+                        RTC.set(tm);
+                    }
                 }
-
             }
 
         } else {
@@ -1292,10 +1315,19 @@ void Watchy::printTime(tmElements_t tm) {
 }
 
 long Watchy::getSecondsBetween(tmElements_t tm1, tmElements_t tm2){
-    long secs1 = (tm1.Hour * 3600) + (tm1.Minute * 60) + tm1.Second;
-    long secs2 = (tm2.Hour * 3600) + (tm2.Minute * 60) + tm2.Second;
 
-    long allSecs = secs1 - secs2;
+    // There's a small chance that NTP can come under watch time by a second
+    // Checking for that is a pain :( the below code struggles to adjust for it
+    // So, we'll manually check if difference between ntp and real is 20 or above and void it if so
+    // Drift per day is normally measured per minute (mine is 1 and a halfish) so it should be okay
+    uint32_t difference = (uint32_t)(makeTime(tm1) - makeTime(tm2));
 
-    return allSecs > 0 ? allSecs : allSecs * -1;
+    uint32_t minCheck = (difference / 60) % 60;
+
+    if (minCheck > 20){
+        // Check is over 20 mins. RIP
+        return -1;
+    } else {
+        return difference;
+    }
 }
