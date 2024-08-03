@@ -1171,6 +1171,11 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
     // Set NTP as last time for drift to compare against
     driftCheckTime = tm;
 
+    // For some reason it seems that date data isn't saved, sometimes.
+    driftCheckTime.Year = tm.Year;
+    driftCheckTime.Month = tm.Month;
+    driftCheckTime.Day = tm.Day;
+
     return true;
 }
 
@@ -1238,6 +1243,11 @@ void Watchy::getTimeDrift() {
             // Check if the drift check val has been initiated
             if (driftCheckTime.Second == 0 && driftCheckTime.Minute == 0 && driftCheckTime.Hour == 0){
                 driftCheckTime = tm;
+
+                // For some reason it seems that date data isn't saved, sometimes.
+                driftCheckTime.Year = tm.Year;
+                driftCheckTime.Month = tm.Month;
+                driftCheckTime.Day = tm.Day;
 
                 display.println("");
                 display.println("Check val set");
@@ -1328,6 +1338,6 @@ long Watchy::getSecondsBetween(tmElements_t tm1, tmElements_t tm2){
         // Check is over 20 mins. RIP
         return -1;
     } else {
-        return difference;
+      return difference;
     }
 }
